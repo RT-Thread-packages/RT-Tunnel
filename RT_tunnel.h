@@ -6,9 +6,9 @@
 #include "rtthread.h"
 
 /* ---------------- Tunnel Configuration ---------------- */
-//#define TUNNEL_NUM         (3UL)          /**< Number of tunnels */
-//#define TUNNEL_BUFFER_SIZE (8 * 1024UL)   /**< Buffer size per tunnel */
-#define TUNNEL_RESET_ID    (0xBAADF00DUL) /**< Default reset ID */
+// #define TUNNEL_NUM         (3UL)          /**< Number of tunnels */
+// #define TUNNEL_BUFFER_SIZE (8 * 1024UL)   /**< Buffer size per tunnel */
+#define TUNNEL_RESET_ID (0xBAADF00DUL) /**< Default reset ID */
 
 /* ---------------- Tunnel Status Flags ---------------- */
 #define STATUS_ACTIVE_Pos (0UL)
@@ -29,13 +29,13 @@
 #define STATUS_BUFFER_Pos       (3UL)
 #define STATUS_BUFFER_Msk       (1UL << STATUS_BUFFER_Pos)
 #define STATUS_BUFFER_FULL      (1UL << STATUS_BUFFER_Pos)
-#define STATYS_BUFFER_AVAILABLE (0UL << STATUS_BUFFER_Pos)
+#define STATUS_BUFFER_AVAILABLE (0UL << STATUS_BUFFER_Pos)
 
 /* ---------------- Tunnel Return Codes ---------------- */
-#define PTR_ERROR_CODE      (-1) /**< Error code indicating that a pointer is NULL or invalid */
-#define TUNNEL_BUSY_CODE    (-2) /**< Error code indicating that the tunnel is currently busy */
-#define OPRATION_ERROR_CODE (-3) /**< Error code indicating an invalid or failed operation */
-#define TUNNEL_FULL_CODE    (-4) /**< Error code indicating that the tunnel buffer is full */
+#define PTR_ERROR_CODE       (-1) /**< Error code indicating that a pointer is NULL or invalid */
+#define TUNNEL_BUSY_CODE     (-2) /**< Error code indicating that the tunnel is currently busy */
+#define OPERATION_ERROR_CODE (-3) /**< Error code indicating an invalid or failed operation */
+#define TUNNEL_FULL_CODE     (-4) /**< Error code indicating that the tunnel buffer is full */
 
 /* ---------------- Tunnel Operation Enum ---------------- */
 /**
@@ -81,16 +81,16 @@ typedef RT_tunnel_CB *RT_tunnel_CB_t;
 /**
  * @brief  Get free byte count of tunnel buffer.
  * @param[in] tunnel Tunnel instance
- * @retval uint32_t  Number of free bytes in the buffer
+ * @retval int  Number of free bytes in the buffer
  */
-uint32_t Get_Tunnel_Buffer_Free(RT_tunnel_t tunnel);
+int Get_Tunnel_Buffer_Free(RT_tunnel_t tunnel);
 
 /**
  * @brief  Get used byte count of tunnel buffer.
  * @param[in] tunnel Tunnel instance
- * @retval uint32_t  Number of used bytes in the buffer
+ * @retval int  Number of used bytes in the buffer
  */
-uint32_t Get_Tunnel_Buffer_Used(RT_tunnel_t tunnel);
+int Get_Tunnel_Buffer_Used(RT_tunnel_t tunnel);
 
 /**
  * @brief  Get a free tunnel instance.

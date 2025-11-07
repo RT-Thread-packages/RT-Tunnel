@@ -9,11 +9,11 @@
     }
 
 /* Error check macro: return 0 if tunnel operation state does not match */
-#define ERROR_CHECK_OPRATION(tunnel, op)               \
+#define ERROR_CHECK_OPERATION(tunnel, op)              \
     if ((tunnel->status & STATUS_OPERATION_Msk) != op) \
     {                                                  \
         LOG_ERROR("tunnel operation error");           \
-        return OPRATION_ERROR_CODE;                    \
+        return OPERATION_ERROR_CODE;                   \
     }
 
 /* Error check macro: return 0 if tunnel is already in use */
@@ -61,10 +61,10 @@ uint8_t Buffer_pool[TUNNEL_NUM][TUNNEL_BUFFER_SIZE];
 static int Read_Buffer(RT_tunnel_t tunnel, void *buffer, uint32_t bytes)
 {
     /* Error check */
-    ERROR_CHECK_OPRATION(tunnel, STATUS_OPERATION_READ);
-    ERROR_CHECK_TUNNEL_USE(tunnel);
     ERROR_CHECK_PTR(tunnel);
     ERROR_CHECK_PTR(buffer);
+    ERROR_CHECK_OPERATION(tunnel, STATUS_OPERATION_READ);
+    ERROR_CHECK_TUNNEL_USE(tunnel);
 
     TUNNEL_SET_BUSY(tunnel);
 
@@ -108,9 +108,9 @@ static int Read_Buffer(RT_tunnel_t tunnel, void *buffer, uint32_t bytes)
 static int Write_Buffer(RT_tunnel_t tunnel, void *buffer, uint32_t bytes)
 {
     /* Error check */
-    ERROR_CHECK_OPRATION(tunnel, STATUS_OPERATION_WRITE);
     ERROR_CHECK_PTR(tunnel);
     ERROR_CHECK_PTR(buffer);
+    ERROR_CHECK_OPERATION(tunnel, STATUS_OPERATION_WRITE);
     ERROR_CHECK_TUNNEL_USE(tunnel);
 
     /* Set tunnel busy flag */
@@ -123,7 +123,7 @@ static int Write_Buffer(RT_tunnel_t tunnel, void *buffer, uint32_t bytes)
     buffer_free = chry_ringbuffer_get_free(&tunnel->RB);
     if (buffer_free < bytes)
     {
-        if ((tunnel->status & STATUS_BUFFER_Msk) == STATYS_BUFFER_AVAILABLE)
+        if ((tunnel->status & STATUS_BUFFER_Msk) == STATUS_BUFFER_AVAILABLE)
         {
             TUNNEL_BUFFER_FULL(tunnel);
             // LOG_ERROR("Write size exceeds buffer capacity.");
@@ -151,9 +151,9 @@ static int Write_Buffer(RT_tunnel_t tunnel, void *buffer, uint32_t bytes)
  *
  * @param[in]    tunnel      tunnel instance
  *
- * @retval uint32_t          number of free bytes in the tunnel buffer
+ * @retval int          number of free bytes in the tunnel buffer
  *****************************************************************************/
-uint32_t Get_Tunnel_Buffer_Free(RT_tunnel_t tunnel)
+int Get_Tunnel_Buffer_Free(RT_tunnel_t tunnel)
 {
     /* Error check */
     ERROR_CHECK_PTR(tunnel);
@@ -165,9 +165,9 @@ uint32_t Get_Tunnel_Buffer_Free(RT_tunnel_t tunnel)
  *
  * @param[in]    tunnel      tunnel instance
  *
- * @retval uint32_t          number of used bytes in the tunnel buffer
+ * @retval int          number of used bytes in the tunnel buffer
  *****************************************************************************/
-uint32_t Get_Tunnel_Buffer_Used(RT_tunnel_t tunnel)
+int Get_Tunnel_Buffer_Used(RT_tunnel_t tunnel)
 {
     /* Error check */
     ERROR_CHECK_PTR(tunnel);
@@ -308,12 +308,24 @@ static int Tunnel_buffer_Print(int argc, char **argv)
     }
 
     /* Parse tunnel index from argv */
-    uint32_t    tunnel_num  = (uint32_t)(*argv[1] - '0');
+    uint32_t tunnel_num = (uint32_t)(*argv[1] - '0');
+    if (tunnel_num >= TUNNEL_NUM)
+    {
+        LOG_ERROR("tunnel_num out of bounds");
+        return -1;
+    }
     RT_tunnel_t test_tunnel = &tunnel_group[tunnel_num];
 
     /* Get used size and allocate temporary buffer */
     uint32_t used   = chry_ringbuffer_get_used(&test_tunnel->RB);
     uint8_t *buffer = rt_malloc(used);
+
+    /* Check for allocation failure */
+    if (buffer == NULL)
+    {
+        LOG_ERROR("rt_malloc failed: buffer is NULL");
+        return -1;
+    }
 
     /* Read buffer content */
     chry_ringbuffer_peek(&test_tunnel->RB, buffer, used);

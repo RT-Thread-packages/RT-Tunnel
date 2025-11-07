@@ -3,7 +3,6 @@
 
 #include "rtthread.h"
 
-/* ANSI颜色定义 */
 #define COLOR_RED     "\033[1;31m"
 #define COLOR_YELLOW  "\033[1;33m"
 #define COLOR_GREEN   "\033[1;32m"
@@ -12,7 +11,6 @@
 #define COLOR_CYAN    "\033[1;36m"
 #define COLOR_RESET   "\033[0m"
 
-/* 日志宏：自动加上函数名、行号 */
 #define LOG_ERROR(fmt, ...)                                        \
     rt_kprintf(COLOR_RED "[ERROR][%s:%d] " fmt COLOR_RESET "\r\n", \
                __FUNCTION__, __LINE__, ##__VA_ARGS__)
